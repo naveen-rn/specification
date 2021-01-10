@@ -1,6 +1,6 @@
 \begin{figure}[h]
 \includegraphics[width=0.95\textwidth]{figures/mem_model}
-\caption{\openshmem Memory Model}
+\caption{\openshmem Memory Model with Default Space (Symmetric Heap)}
 \label{fig:mem_model}
 \end{figure}
 %
@@ -12,16 +12,16 @@ via \openshmem routines. Private data objects follow the memory model of
 \Cstd. Remotely accessible objects, however, can be accessed by
 remote \acp{PE} using \openshmem routines.  Remotely accessible data objects are
 called \emph{Symmetric Data Objects}.  Each symmetric data object has a
-corresponding object with the same name, type, and size on all \acp{PE} where that object is
-accessible via the \openshmem \ac{API}\footnote{For efficiency reasons,
-the same offset (from an arbitrary memory address) for symmetric data
+corresponding object with the same name, type, and size on all \acp{PE} where
+that object is accessible via the \openshmem \ac{API}\footnote{For efficiency
+reasons, the same offset (from an arbitrary memory address) for symmetric data
 objects might be used on all \acp{PE}. Further discussion about symmetric heap
 layout and implementation efficiency can be found in Section~\ref{subsec:shfree}}.
-(For the definition of what is accessible, see the
-descriptions for \FUNC{shmem\_pe\_accessible} and \FUNC{shmem\_addr\_accessible}
+(For the definition of what is accessible, see the descriptions for
+\FUNC{shmem\_pe\_accessible} and \FUNC{shmem\_addr\_accessible}
 in Sections~\ref{subsec:shmem_pe_accessible} and
-\ref{subsec:shmem_addr_accessible}.) In \openshmem the following kinds of
-data objects are symmetric:
+\ref{subsec:shmem_addr_accessible}.) In \openshmem the following kinds of data
+objects are symmetric:
 %
 \begin{itemize}
 \item Global and static \Cstd and \Cpp variables. These data objects must
@@ -32,15 +32,36 @@ data objects are symmetric:
 
 \openshmem dynamic memory allocation routines (e.g.,
 \FUNC{shmem\_malloc}) allow collective allocation of \emph{Symmetric Data
-Objects} on a special memory region called the \emph{Symmetric Heap}. The
-Symmetric Heap is created during the execution of a program at a memory location
+Objects} on a special memory region called the \emph{Memory Spaces}. There are
+two types of memory spaces, (1) implementation determined default space and
+(2) user-defined explicit space.
+
+The implementation determined default space, also known as the \emph{Symmetric
+Heap} is created during the execution of a program at a memory location
 determined by the implementation. The Symmetric Heap may reside in different
-memory regions on different \acp{PE}.
-Figure~\ref{fig:mem_model} shows an example \openshmem
-memory layout, illustrating the location of remotely accessible symmetric
-objects and private data objects.  As shown, symmetric data objects can be
-located either in the symmetric heap or in the global/static memory section of
-each \ac{PE}.
+memory regions on different \acp{PE}. Figure~\ref{fig:mem_model} shows an
+example \openshmem memory layout, illustrating the location of remotely
+accessible symmetric objects and private data objects. As shown, symmetric data
+objects can be located either in the symmetric heap or in the global/static
+memory section of each \ac{PE}.
+
+\begin{figure}[h]
+\includegraphics[width=\textwidth]{figures/spaces_mem_model.png}
+\caption{\openshmem Memory Model with Implementation determined Default Space
+(Symmetric Heap) on all \acp{PE} and User-defined Explicit Spaces on TEAM:1 and
+TEAM:2}
+\label{fig:spaces_mem_model}
+\end{figure}
+
+A user-defined explicit space is created and destroyed during
+\FUNC{shmem\_team\_split\_\*} and \FUNC{shmem\_team\_destroy} respectively. The
+traits of an explicit space are defined using a set of configuration parameters
+that determines its different properties like its size, location, and type of
+the memory region. Figure~\ref{fig:spaces_mem_model} shows an example \openshmem
+memory layout with two different explicit spaces along with the default
+symmetric heap. As shown, symmetric data objects can be located either on the
+explicit space as well as the symmetric heap or in the global/static memory
+section of each \ac{PE}.
 
 \subsection{Pointers to Symmetric Objects}\label{subsec:pointers_to_symmetric_objects}
 
